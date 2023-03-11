@@ -1,0 +1,17 @@
+<h1>Index</h1>
+
+<p>First web page</p>
+
+<p>
+<ul>
+    {% for animal in animals %}
+    <li>
+        {% if animal == "dog" %}
+            <b>{{ animal }}</b>
+        {% else %}
+        <i>{{ animal }}</i>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+</p>
