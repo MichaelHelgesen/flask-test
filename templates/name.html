@@ -8,7 +8,10 @@
         </div>
     {% endfor %}
     {% if name %}
-        <h1>HELLO {{ name }}</h1>
+        <h1>HELLO {{ name }}</h1><br/>
+        <img src="{{ url_for('static', filename='images/DSC08518.jpg')}}" width="100%" />
+        <p id="demo">Dette er en demo</p>
+        <script src="{{ url_for('static', filename='js/js-file.js') }}"></script>
     {% else %}
         <h1>What is your name?</h1>
         <br />
