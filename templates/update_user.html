@@ -8,23 +8,23 @@
         </div>
     {% endfor %}
     {% if name %}
-        <h1>HELLO {{ name }}</h1><br/>
+        <h1>Update user</h1><br/>
     {% else %}
-        <h1>What is your name?</h1>
+        <h1>Update user</h1>
         <br />
-        <form method="POST">
+        <form action="/update/{{ name_to_update.id }}" method="POST">
             {{ form.hidden_tag() }}
             {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control") }}
+            {{ form.name(class="form-control", value=name_to_update.name) }}
             <br />
             {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control") }}
+            {{ form.email(class="form-control", value=name_to_update.email) }}
             {{ form.submit(class="btn btn-secondary") }}
         </form>
         <br/>
         <br/>
         {% for our_user in our_users %}
-            <a href="{{ url_for('update', id=our_user.id)}}">{{our_user.id }} - {{ our_user.name }} - {{ our_user.email }}</a><br />
+            {{ our_user.id }} - {{ our_user.name }} - {{ our_user.email }}<br />
         {% endfor %}
     {% endif %}
 {% endblock %}
