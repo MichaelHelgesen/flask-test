@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for message in get_flashed_messages() %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Gratulerer {{ name }} - {{ message }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    {% if name %}
+        <h1>HELLO {{ name }}</h1><br/>
+    {% else %}
+        <h1>What is your name?</h1>
+        <br />
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            <br />
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+            {{ form.submit(class="btn btn-secondary") }}
+        </form>
+        <br/>
+        <br/>
+        {% for our_user in our_users %}
+            {{ our_user.id }} - {{ our_user.name }} - {{ our_user.email }}<br />
+        {% endfor %}
+    {% endif %}
+{% endblock %}
