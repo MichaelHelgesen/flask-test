@@ -17,11 +17,29 @@
                     <a class="nav-link active" aria-current="page" href="{{ url_for('name')}}">Form</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('add_user')}}">Add user</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('update', id=1)}}">Update user</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('add_post')}}">Add blog</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('posts')}}">Posts</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard')}}">Dashboard</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('login')}}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('add_user')}}">Add user</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>

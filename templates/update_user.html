@@ -10,7 +10,7 @@
     {% if name %}
         <h1>Update user</h1><br/>
     {% else %}
-        <h1>Update user</h1>
+        <h1>Update user {{ name_to_update.name }}</h1>
         <br />
         <form action="/update/{{ name_to_update.id }}" method="POST">
             {{ form.hidden_tag() }}
@@ -20,12 +20,21 @@
             {{ form.favourite_color.label(class="form-label") }}
             {{ form.favourite_color(class="form-control", value=name_to_update.favourite_color) }}
             <br />
+            {{ form.password_hash.label(class="form-label") }}
+            {{ form.password_hash(class="form-control") }}
+            <br />
             {{ form.email.label(class="form-label") }}
             {{ form.email(class="form-control", value=name_to_update.email) }}
+            <br />
             {{ form.submit(class="btn btn-secondary") }}
         </form>
         <br/>
         <br/>
         <a href="{{ url_for('delete', id=name_to_update.id)}}">Delete</a>
     {% endif %}
+    {% for our_user in our_users %}
+            <a href="{{ url_for('update', id=our_user.id)}}">{{our_user.id }} - {{ our_user.name }} - {{ our_user.email }} - {{ our_user.favourite_color }} - {{  our_user.password_hash }}</a>
+            <a href="{{ url_for('delete', id=our_user.id)}}">Delete</a>
+            <br />
+        {% endfor %}
 {% endblock %}
