@@ -20,6 +20,8 @@
         <strong>Email: {{ current_user.email }}</strong><br />
         <strong>Favorite color: : {{ current_user.favourite_color }}</strong><br />
         <strong>Joined: {{ current_user.date_added }}</strong><br />
+        <strong>About: {{ current_user.about_author }}</strong><br />
+        <strong>Pic: {{ current_user.profile_pic }}</strong><br />
         <img src="/static/images/DSC08518.jpg" width="100%"/>
         <a href="{{ url_for('update', id=current_user.id)}}">Edit</a><br/>
         <a href="{{ url_for('delete', id=current_user.id)}}">Slett</a>
@@ -31,7 +33,7 @@
             </div>
             <div class="card-body">
           
-                <form action="/dashboard" method="POST">
+                <form action="/dashboard" method="POST" enctype="multipart/form-data">
                     {{ form.hidden_tag() }}
                     {{ form.name.label(class="form-label") }}
                     {{ form.name(class="form-control", value=name_to_update.name) }}
@@ -42,8 +44,11 @@
                     {{ form.favourite_color.label(class="form-label") }}
                     {{ form.favourite_color(class="form-control", value=name_to_update.favourite_color) }}
                     <br />
+                    {{ form.profile_pic.label(class="form-label") }}
+                    {{ form.profile_pic(class="form-control", value=name_to_update.profile_pick) }}
+                    <br />
                     {{ form.about_author.label(class="form-label") }}
-                    {{ form.about_author(class="form-control", value=name_to_update.about_author) }}
+                    {{ form.about_author(class="form-control", value=current_user.about_author) }}
                     <br />
                     {{ form.password_hash.label(class="form-label") }}
                     {{ form.password_hash(class="form-control") }}
