@@ -4,8 +4,11 @@ from datetime import datetime, date
 from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, logout_user, login_required, current_user 
-from webforms import LoginForm, PostForm, UserForm, PasswordForm, NamerForm, UpdateUserForm
+from webforms import LoginForm, SearchForm, PostForm, UserForm, PasswordForm, NamerForm, UpdateUserForm
+from flask_ckeditor import CKEditor
+
 app = Flask(__name__)
+ckeditor = CKEditor(app)
 #add database
 # old sqlite3 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:Hannemin25@localhost/our_users"
@@ -35,6 +38,7 @@ def get_current_date():
 
 # Update Database record
 @app.route("/update/<int:id>", methods=["GET", "POST"])
+@login_required
 def update(id):
     form = UpdateUserForm()
     our_users = Users.query.order_by(Users.date_added)
@@ -46,6 +50,7 @@ def update(id):
             name_to_update.password_hash = hashed_pw
         name_to_update.name = request.form["name"]
         name_to_update.email = request.form["email"]
+        name_to_update.about_author = request.form["about_author"]
         name_to_update.favourite_color = request.form["favourite_color"]
         name_to_update.username = request.form["username"]
         try:
@@ -62,6 +67,16 @@ def update(id):
 def index():
     favourite_animals = ["dog", "cat", "horse"]
     return render_template("index.html", animals=favourite_animals)
+
+@app.route('/admin')
+@login_required
+def admin():
+    id = current_user.id
+    if id == 15:
+        return render_template("admin.html")
+    else:
+        flash("Must be admin")
+        return redirect(url_for("dashboard"))
 
 @app.route("/delete/<int:id>")
 def delete(id):
@@ -80,19 +95,20 @@ def delete(id):
         return render_template("add_user.html", form=form, name=name, our_users=our_users)
 
 @app.route("/add-post", methods=["GET", "POST"])
-# @login_required
+@login_required
 def add_post():
     form = PostForm()
     if form.validate_on_submit():
+        poster = current_user.id
         post = Posts(
             title=form.title.data,
+            poster_id=poster,
             content=form.content.data,
-            author=form.author.data,
             slug=form.slug.data
         )
         form.title.data = ""
         form.content.data = ""
-        form.author.data = ""
+        # form.author.data = ""
         form.slug.data = ""
         db.session.add(post)
         db.session.commit()
@@ -115,12 +131,13 @@ def add_user():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
             hashed_pw = generate_password_hash(form.password_hash.data, "sha256")
-            user = Users(name=form.name.data, email=form.email.data, favourite_color=form.favourite_color.data, password_hash=hashed_pw, username=form.username.data)
+            user = Users(name=form.name.data, about_author=form.about_author.data, email=form.email.data, favourite_color=form.favourite_color.data, password_hash=hashed_pw, username=form.username.data)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
         form.name.data = ""
         form.email.data = ""
+        form.about_author.data = ""
         form.favourite_color.data = ""
         form.password_hash.data = ""
         form.username.data = ""
@@ -180,6 +197,26 @@ def blogpost(id):
     post = Posts.query.get_or_404(id)
     return render_template("blogpost.html", post=post)
 
+@app.context_processor
+def base():
+    form = SearchForm()
+    return dict(form=form)
+
+@app.route('/search', methods=["POST"])
+def search():
+    form = SearchForm()
+    posts = Posts.query
+    if form.validate_on_submit():
+        post_searched = form.searched.data
+        posts = posts.filter(Posts.content.like("%" + post_searched + "%"))
+        posts = posts.order_by(Posts.title).all()
+        return render_template("search.html",
+                               form=form,
+                               searched=post_searched,
+                               posts=posts
+                               )
+    return render_template("search.html")
+
 @app.route('/posts/edit/<int:id>', methods=["GET", "POST"])
 @login_required
 def edit_post(id):
@@ -187,18 +224,23 @@ def edit_post(id):
     form = PostForm()
     if form.validate_on_submit():
         post.title = form.title.data
-        post.author = form.author.data
+        # post.author = form.author.data
         post.slug = form.slug.data
         post.content = form.content.data
         db.session.add(post)
         db.session.commit()
         flash("post updatet")
         return redirect(url_for("blogpost", id=post.id))
-    form.title.data = post.title
-    form.author.data = post.author
-    form.slug.data = post.slug
-    form.content.data = post.content
-    return render_template("edit_post.html", form=form)
+    
+    if current_user.id == post.poster_id:
+        form.title.data = post.title
+        #form.author.data = post.author
+        form.slug.data = post.slug
+        form.content.data = post.content
+        return render_template("edit_post.html", form=form)
+    else:
+        flash("not authorized")
+        return redirect(url_for("posts"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -217,26 +259,54 @@ def login():
             flash("no such user")
     return render_template("login.html", form=form)
 
-@app.route("/dashboard", methods=["GET", "POSTS"])
+@app.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    form = UpdateUserForm()
+    id = current_user.id
+    our_users = Users.query.order_by(Users.date_added)
+    name_to_update = Users.query.get_or_404(id)
+    if request.method == "POST":
+        password = request.form["password_hash"]
+        if password:
+            hashed_pw = generate_password_hash(password, "sha256")
+            name_to_update.password_hash = hashed_pw
+        name_to_update.name = request.form["name"]
+        name_to_update.email = request.form["email"]
+        name_to_update.about_author = request.form["about_author"]
+        name_to_update.favourite_color = request.form["favourite_color"]
+        name_to_update.username = request.form["username"]
+        try:
+            db.session.commit()
+            flash("User updated!")
+            return render_template("dashboard.html", form=form, name_to_update=name_to_update, our_users=our_users)
+        except:
+            flash("Error")
+            return render_template("dashboard.html", form=form, name_to_update=name_to_update, our_users=our_users)
+    else:
+        return render_template("dashboard.html", form=form, name_to_update=name_to_update, our_users=our_users, id=id)
 
 @app.route("/posts/delete/<int:id>", methods=["GET", "POSTS"])
+@login_required
 def delete_post(id):
     post = Posts.query.get_or_404(id)
-    try:
-        db.session.delete(post)
-        db.session.commit()
-        flash("blogpost deleted")
-        posts = Posts.query.order_by(Posts.date_posted)
-        return redirect(url_for("posts", posts = posts))
-    except:
+    id = current_user.id
+    if id == post.poster.id:   
+        try:
+            db.session.delete(post)
+            db.session.commit()
+            flash("blogpost deleted")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return redirect(url_for("posts", posts = posts))
+        except:
+            flash("error")
+            posts = Posts.query.order_by(Posts.date_posted)
+            return redirect(url_for("posts", posts = posts))
+    else:
         flash("error")
         posts = Posts.query.order_by(Posts.date_posted)
         return redirect(url_for("posts", posts = posts))
-
-    return render_template("dashboard.html")
+    # return render_template("dashboard.html")
 
 # logout
 @app.route("/logout", methods=["GET", "POST"])
@@ -252,9 +322,11 @@ class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255))
     content = db.Column(db.Text)
-    author = db.Column(db.String(255))
+    # author = db.Column(db.String(255))
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
     slug = db.Column(db.String(255))
+    # foreign key to link to users (refer to primary key of user)
+    poster_id = db.Column(db.Integer, db.ForeignKey("users.id")) # tabeller i små bokstaver
 
     # Create database model
 class Users(db.Model, UserMixin):
@@ -263,7 +335,9 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
     favourite_color = db.Column(db.String(120))
+    about_author = db.Column(db.Text(500), nullable=True)
     date_added = db.Column(db.DateTime, default=datetime.utcnow)
+    posts = db.relationship("Posts", backref = "poster") # Referanse til classe
     # password stuff
     password_hash = db.Column(db.String(128))
 

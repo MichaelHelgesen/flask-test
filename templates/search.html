@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>SEarch</h1>
+{{ searched }}
+{% for post in posts %}
+    <div><a href="{{ url_for('blogpost', id=post.id)}}">{{ post.title }}</a></div>
+{% endfor %}
+{% endblock %}

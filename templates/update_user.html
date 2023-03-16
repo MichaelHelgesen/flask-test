@@ -7,9 +7,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     {% endfor %}
-    {% if name %}
-        <h1>Update user</h1><br/>
-    {% else %}
+   {% if id == current_user.id %}
         <h1>Update user {{ name_to_update.name }}</h1>
         <br />
         <form action="/update/{{ name_to_update.id }}" method="POST">
@@ -23,6 +21,9 @@
             {{ form.favourite_color.label(class="form-label") }}
             {{ form.favourite_color(class="form-control", value=name_to_update.favourite_color) }}
             <br />
+            {{ form.about_author.label(class="form-label") }}
+            {{ form.about_author(class="form-control", value=name_to_update.about_author) }}
+            <br />
             {{ form.password_hash.label(class="form-label") }}
             {{ form.password_hash(class="form-control") }}
             <br />
@@ -34,10 +35,11 @@
         <br/>
         <br/>
         <a href="{{ url_for('delete', id=name_to_update.id)}}">Delete</a>
+    {% else %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>You cant edit this user</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {% endif %}
-    {% for our_user in our_users %}
-            <a href="{{ url_for('update', id=our_user.id)}}">{{our_user.id }} - {{ our_user.name }} - {{ our_user.email }} - {{ our_user.favourite_color }} - {{  our_user.password_hash }}</a>
-            <a href="{{ url_for('delete', id=our_user.id)}}">Delete</a>
-            <br />
-        {% endfor %}
+    
 {% endblock %}

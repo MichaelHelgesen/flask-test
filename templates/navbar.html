@@ -17,9 +17,6 @@
                     <a class="nav-link active" aria-current="page" href="{{ url_for('name')}}">Form</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url_for('update', id=1)}}">Update user</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('add_post')}}">Add blog</a>
                 </li>
                 <li class="nav-item">
@@ -30,8 +27,16 @@
                     <a class="nav-link active" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{{ url_for('update', id=current_user.id)}}">Update user</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('dashboard')}}">Dashboard</a>
                 </li>
+                {% if current_user.id == 15 %}
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{ url_for('admin')}}">Admin</a>
+                    </li>
+                {% endif %}
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link active" aria-current="page" href="{{ url_for('login')}}">Login</a>
@@ -41,6 +46,11 @@
                 </li>
                 {% endif %}
             </ul>
+            <form class="d-flex" role="search" method="POST" action="{{ url_for('search')}}">
+                {{ form.hidden_tag() }}
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+              </form>
         </div>
     </div>
 </nav>

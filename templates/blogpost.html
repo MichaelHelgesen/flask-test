@@ -11,8 +11,8 @@
         <br />
             <div class="alert alert-warning">
                 <h2>{{ post.title}} {{ post.id}}</h2>
-                <small>{{ post.date}}</small> - <small>{{ post.slug}}</small> - <small>{{ post.author}}</small>
-                <p>{{ post.content}}<p>
+                <small>date: {{ post.date_posted }}</small> - <small>slug: {{ post.slug }}</small> - <small>by: {{ post.poster.name }}</small>
+                <p>{{ post.content|safe}}<p>
                 <a href="{{url_for('posts')}}">Tilbake</a>
                 <a href="{{url_for('edit_post', id=post.id)}}">Rediger</a>
                 <a href="{{url_for('delete_post', id=post.id)}}">Delete</a>

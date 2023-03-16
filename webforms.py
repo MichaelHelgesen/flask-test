@@ -1,14 +1,15 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms import StringField, SubmitField, TextAreaField, PasswordField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length
 from wtforms.widgets import TextArea
-
+from flask_ckeditor import CKEditorField
 
 
 class PostForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
-    content = StringField('Content', validators=[DataRequired()], widget=TextArea())
-    author = StringField('Author', validators=[DataRequired()])
+    #content = StringField('Content', validators=[DataRequired()], widget=TextArea())
+    content = CKEditorField("Content", validators=[DataRequired()])
+    author = StringField('Author')
     slug = StringField('Slugfield', validators=[DataRequired()])
     submit = SubmitField("Submit")
 
@@ -35,6 +36,7 @@ class UserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('email', validators=[DataRequired()])
     favourite_color = StringField("Favourite color")
+    about_author = TextAreaField("about_author")
     password_hash = PasswordField("Password", validators=[DataRequired(), EqualTo("password_hash2", message="PAsswords much match")])
     password_hash2 = PasswordField("Confirm Password", validators=[DataRequired()])
     submit = SubmitField("Submit")
@@ -43,7 +45,12 @@ class UserForm(FlaskForm):
 class UpdateUserForm(FlaskForm):
     name = StringField('name', validators=[DataRequired()])
     username = StringField('Username', validators=[DataRequired()])
+    about_author = TextAreaField("about_author")
     email = StringField('email', validators=[DataRequired()])
     favourite_color = StringField("Favourite color")
     password_hash = PasswordField("Password")
+    submit = SubmitField("Submit")
+
+class SearchForm(FlaskForm):
+    searched = StringField('Searched', validators=[DataRequired()])
     submit = SubmitField("Submit")
